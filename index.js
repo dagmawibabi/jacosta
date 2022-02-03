@@ -37,8 +37,8 @@ bot.on("message", (msg) => {
         let imageLink = msgReceived.substring(10, msgReceived.length);
         let imageLink2 = "Sending photo..." + msgReceived.substring(10, msgReceived.length);
 
-        bot.sendMessage(chatId, imageLink2);
-        bot.sendPhoto(msg.chat.id,imageLink);
+        //bot.sendMessage(chatId, imageLink2);
+        bot.sendPhoto(chatId,imageLink);
     }
 
 });

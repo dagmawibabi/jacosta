@@ -17,20 +17,31 @@ bot.on(/\/start/, (msg) => {
 });
 
 
-// Conbo
-let bye = "Good Bye, Have a nice time!";
+// Convo
 bot.on("message", (msg) => {
     const chatId = msg.chat.id;
     const msgReceived = msg.text.toString().toLowerCase();
-    let greetings = "Hello 👋 \n" +  msg.chat.first_name.toString();
     // Hello
+    let greetings = "Hello 👋 \n" +  msg.chat.first_name.toString() + ".";
     if(msgReceived.includes("hi") || msgReceived.includes("hello") || msgReceived.includes("hey")){
         bot.sendMessage(chatId, greetings);
     }
+    // Bye
+    let bye = "Good Bye, Have a nice time!";
     if(msgReceived.includes("bye")){
         bot.sendMessage(chatId, bye);
     }
 
+    // Send Photo
+    if(msgReceived.includes("send photo")){
+        bot.sendMessage(chatId, "Sending photo...");
+        let imageLink = msgReceived.padStart(10);
+        bot.sendPhoto(msg.chat.id,imageLink);
+    }
+
 });
+
+
+
 
 

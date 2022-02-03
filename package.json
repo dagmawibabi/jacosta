@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/dagmawibabi/jacosta#readme",
   "dependencies": {
-    "node-telegram-bot-api": "^0.56.0"
+    "node-telegram-bot-api": "^0.56.0",
+    "request": "^2.88.2"
   }
 }

@@ -181,6 +181,8 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, "Getting Crypto Prices...");
         await getCryptoData(chatId);
     }
+
+    //
     
 });
 

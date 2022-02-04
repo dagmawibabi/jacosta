@@ -3,7 +3,7 @@ const request = require('request');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
 
-//const token = '5208477658:AAHL6kfn6C7v_ngn41xjIAoL9MCbBNsjhO8';
+const token = '5208477658:AAHL6kfn6C7v_ngn41xjIAoL9MCbBNsjhO8';
 const bot = new TelegramBot(token, {polling: true});
 
 bot.onText(/\/echo (.+)/, (msg, match) => {

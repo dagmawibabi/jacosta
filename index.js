@@ -3,12 +3,10 @@ const request = require('request');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
 
-const token = '5208477658:AAE4ouDcP9YSHlFD9bP2TqQ-BuUVRG_08YQ';
+//const token = '5208477658:AAE4ouDcP9YSHlFD9bP2TqQ-BuUVRG_08YQ';
 const bot = new TelegramBot(token, {polling: true});
-//const bot = new TelegramBot(token, {webHook: true} )
 
-bot.setWebHook("https://cd70-197-156-107-157.ngrok.io")
-
+//
 bot.onText(/\/echo (.+)/, (msg, match) => {
   const chatId = msg.chat.id;
   const resp = match[1]; // the captured "whatever"

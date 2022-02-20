@@ -21,7 +21,8 @@ let commands = {
             ["Hello"],
             ["About Me"],
             ["Download Images"],
-            ["Send Photo", "Send Song"], 
+            ["Save Song", "Send Songs"],
+            ["Send Photo"], 
             ["Covid Stats", "Crypto Prices"],
             ["Good Morning" ,"Good Night"],
             ["Bye"],
@@ -135,7 +136,7 @@ bot.on("audio", async (msg) => {
     fs.rename('assets/music/' + musicListArray[musicListArray.length - 1], 'assets/music/' + msg.audio.title + ".mp3", function(err) {
         if ( err ) console.log('ERROR: ' + err);
     });
-    bot.sendMessage(msg.chat.id, "'" + msg.audio.title + "' has been added to database!");
+    bot.sendMessage(msg.chat.id, "'" + msg.audio.title + "' has been added to database! ✅");
 });
 
 let musicListArray = [];
@@ -208,7 +209,10 @@ bot.on("message", async (msg) => {
     }
 
     // Send Music
-    if(msgReceived.includes("send song")){
+    if(msgReceived.includes("save song")){
+        bot.sendMessage(chatId, "Send me a song to save to the cloud...");
+    }
+    if(msgReceived.includes("send songs")){
         await getDownloadedSongs();
         bot.sendMessage(chatId, "Choose Song...", musicList);
     }

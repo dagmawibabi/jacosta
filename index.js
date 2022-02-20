@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const request = require('request');
+const fs = require('fs');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
 
@@ -17,10 +18,13 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 let commands = {
     "reply_markup": {
         "keyboard": [
-            ["Hello", "Good Morning"],
+            ["Hello"],
+            ["About Me"],
+            ["Download Images"],
             ["Send Photo", "Send Song"], 
             ["Covid Stats", "Crypto Prices"],
-            ["Good Night", "Bye"],
+            ["Good Morning" ,"Good Night"],
+            ["Bye"],
         ]
     }
 };
@@ -123,10 +127,50 @@ Recovered: ${bodyJSON["recovered"]}
 }
 
 
+bot.on("audio", async (msg) => {
+    console.log(msg.audio);
+    bot.sendMessage(msg.chat.id, "Adding to database...");
+    await bot.downloadFile(msg.audio.file_id, "assets/music");    
+    await getDownloadedSongs();
+    fs.rename('assets/music/' + musicListArray[musicListArray.length - 1], 'assets/music/' + msg.audio.title + ".mp3", function(err) {
+        if ( err ) console.log('ERROR: ' + err);
+    });
+    bot.sendMessage(msg.chat.id, "'" + msg.audio.title + "' has been added to database!");
+});
+
+let musicListArray = [];
+let musicList = {
+    "reply_markup": {
+        "keyboard": [
+        ]
+    }
+};
+function getDownloadedSongs(){
+    console.log("hereeeeeeee");
+    musicList = {
+        "reply_markup": {
+            "keyboard": [
+            ]
+        }
+    };
+    fs.readdirSync("assets/music").forEach(file => {
+        console.log(file);
+        musicList["reply_markup"]["keyboard"].push([file]);
+        musicListArray.push(file);
+    });    
+}
+
 // Convo
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
-    const msgReceived = msg.text.toString().toLowerCase();
+    let msgReceived = "";
+    try {
+        msgReceived = msg.text.toString().toLowerCase();
+    } catch (err){
+        msgReceived = "abc";
+        //console.log(msg.audio.duration.toString());
+        bot.sendMessage(msg.audio["file_name"].toString());
+    }
 
     // Hello
     let greetings = "Hello 👋 \n" +  msg.chat.first_name.toString() + ".";
@@ -165,9 +209,12 @@ bot.on("message", async (msg) => {
 
     // Send Music
     if(msgReceived.includes("send song")){
-        //let songLink = msgReceived.substring(8, msgReceived.length);
+        await getDownloadedSongs();
+        bot.sendMessage(chatId, "Choose Song...", musicList);
+    }
+    if(msgReceived.includes("mp3")){
         bot.sendMessage(chatId, "Sending Song...");
-        await bot.sendAudio(chatId, "assets/music/bornSinner.mp3");
+        await bot.sendAudio(chatId, "assets/music/" + msgReceived);
         bot.sendMessage(chatId, "Done!", commands);
     }
 
@@ -183,7 +230,32 @@ bot.on("message", async (msg) => {
         await getCryptoData(chatId);
     }
 
-    //
+    // About Me
+    if(msgReceived.includes("about me")){
+        let userProfile = "\nIs Bot: " + msg.from.is_bot + "\nType: " + msg.chat.type + "\nID: " + msg.chat.id + "\nFirst Name: " + msg.chat.first_name + "\nUsername: @" + msg.chat.username; 
+        bot.sendMessage(chatId, "Your Profile...");
+        bot.sendMessage(chatId, userProfile);
+    }
+
+    // Pinterest Downloader
+    //Pinterest
+    if(msgReceived.includes("download images")){
+        bot.sendMessage(chatId, "Send me the image link...");
+    }
+
+    if((msgReceived.includes("jpg") == true) || (msgReceived.includes("png") == true) || (msgReceived.includes("gif") == true)){
+        await bot.sendMessage(chatId, "Downloading...");
+        await bot.sendPhoto(chatId, msgReceived);
+        bot.sendMessage(chatId, "Done!");
+    }
+    if(msgReceived.includes("mp4")){
+        await bot.sendMessage(chatId, "Downloading...");
+        await bot.downloadFile(msgReceived, "assets/video");
+        bot.sendMessage(chatId, "Done!");
+    }
+
+
+    
     
 });
 

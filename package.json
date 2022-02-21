@@ -1,26 +1,22 @@
 {
   "name": "jacosta",
   "version": "1.0.0",
-  "description": "A Telegram Bot",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dagmawibabi/jacosta.git"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/dagmawibabi/jacosta/issues"
-  },
-  "homepage": "https://github.com/dagmawibabi/jacosta#readme",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "coingecko-api": "^1.0.10",
+    "ffmpeg": "^0.0.4",
+    "fluent-ffmpeg": "^2.1.2",
     "node-telegram-bot-api": "^0.56.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "youtube-mp3-converter": "^1.0.3"
   }
 }

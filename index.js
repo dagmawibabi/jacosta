@@ -3,8 +3,11 @@ const request = require('request');
 const fs = require('fs');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
+const youtubeMp3Converter = require('youtube-mp3-converter');
+const ffmpeg = require('@ffmpeg-installer/ffmpeg');
+const audio = require('fluent-ffmpeg/lib/options/audio');
 
-const token = '5208477658:AAE4ouDcP9YSHlFD9bP2TqQ-BuUVRG_08YQ';
+const token = '5208477658:AAHz6MzRo-5wKstgpJcYMLO3O5EeesMGT2Q';
 const bot = new TelegramBot(token, {polling: true});
 
 //
@@ -14,15 +17,15 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
   bot.sendMessage(chatId, resp);
 });
 
-// Start
+// Commands
 let commands = {
     "reply_markup": {
         "keyboard": [
             ["Hello"],
             ["About Me"],
-            ["Download Images"],
-            ["Save Song", "Send Songs"],
-            ["Send Photo"], 
+            ["Analyze Music File"],
+            ["Save Song", "Send Songs"], 
+            ["Send Photo","Download Images"],
             ["Covid Stats", "Crypto Prices"],
             ["Good Morning" ,"Good Night"],
             ["Bye"],
@@ -127,16 +130,58 @@ Recovered: ${bodyJSON["recovered"]}
     })
 }
 
+let albumArtTemp = "";
+function getTempFiles(){
+    fs.readdirSync("assets/temp").forEach(file => {
+        albumArtTemp = file;
+    });   
+}
 
+// 
+let analyzeFile = false;
 bot.on("audio", async (msg) => {
-    console.log(msg.audio);
-    bot.sendMessage(msg.chat.id, "Adding to database...");
-    await bot.downloadFile(msg.audio.file_id, "assets/music");    
-    await getDownloadedSongs();
-    fs.rename('assets/music/' + musicListArray[musicListArray.length - 1], 'assets/music/' + msg.audio.title + ".mp3", function(err) {
-        if ( err ) console.log('ERROR: ' + err);
-    });
-    bot.sendMessage(msg.chat.id, "'" + msg.audio.title + "' has been added to database! ✅");
+    if(analyzeFile == true){
+        try {
+            // Duration
+            let duration = msg.audio.duration;
+            let minutes = Math.floor(duration / 60);
+            let seconds = duration - minutes * 60;
+            let hours = Math.floor(duration / 3600);
+            //console.log(msg.audio);
+            let fileDetails = "Filename: " + msg.audio.file_name + "\nTitle: " + msg.audio.title + "\nPerformer: " + msg.audio.performer + "\nDuration: " + hours.toString() + ":" + minutes.toString() + ":" + seconds.toString() + "\nFile Size: " + Math.floor(Math.ceil(msg.audio.file_size / 1024)/1024).toString() + "mbs" + "\nMime Type: " + msg.audio.mime_type;
+    
+            await bot.downloadFile(msg.audio.thumb.file_id, "assets/temp");
+            await getTempFiles();
+    
+            await bot.sendMessage(msg.chat.id, "Here are the file details...");        
+            await bot.sendPhoto(msg.chat.id, "assets/temp/" + albumArtTemp, {caption: fileDetails});
+            //await bot.sendPhoto(msg.chat.id, "assets/picture/musicIcon.jpg", {caption: fileDetails});
+            bot.sendMessage(msg.chat.id, "Done!");        
+    
+            await fs.rmSync("assets/temp/" + albumArtTemp);
+        } catch (error) {
+            bot.sendMessage(msg.chat.id, "Sorry,\nSong Can't Be Analyzed.\nTry another song!");            
+        }
+        analyzeFile = false;
+    } else {
+        if(msg.audio.title.includes("\"")){
+            bot.sendMessage(msg.chat.id, "Sorry,\nSong can't contain quotes in the title! \nTry Again!");
+        } else {
+            bot.sendMessage(msg.chat.id, "Adding to database...");
+            await bot.downloadFile(msg.audio.file_id, "assets/music");    
+            await getDownloadedSongs();
+            for(song of musicListArray){
+                if(song.includes("file")){
+                    await fs.renameSync(('assets/music/' + song), ('assets/music/' + msg.audio.title + ".mp3"), function(err) {
+                        if ( err ){
+                            fs.rm('assets/music/' + song);
+                        };
+                    });
+                }
+            }
+            bot.sendMessage(msg.chat.id, "'" + msg.audio.title + "' has been added to database! ✅");
+        }
+    }
 });
 
 let musicListArray = [];
@@ -146,16 +191,16 @@ let musicList = {
         ]
     }
 };
-function getDownloadedSongs(){
-    console.log("hereeeeeeee");
+function getDownloadedSongs ()  {
+    musicListArray = [];
     musicList = {
         "reply_markup": {
             "keyboard": [
+                ["Back"],
             ]
         }
     };
     fs.readdirSync("assets/music").forEach(file => {
-        console.log(file);
         musicList["reply_markup"]["keyboard"].push([file]);
         musicListArray.push(file);
     });    
@@ -173,10 +218,19 @@ bot.on("message", async (msg) => {
         bot.sendMessage(msg.audio["file_name"].toString());
     }
 
+    if(msgReceived.includes("back")){
+        bot.sendMessage(chatId, "What do you wanna do?", commands);
+    }
+
     // Hello
     let greetings = "Hello 👋 \n" +  msg.chat.first_name.toString() + ".";
     if(msgReceived.includes("hi") || msgReceived.includes("hello") || msgReceived.includes("hey")){
         bot.sendMessage(chatId, greetings, commands);
+    }
+
+    // Thank You
+    if(msgReceived.includes("thank you")){
+        bot.sendMessage(chatId, "You're very welcome!");
     }
 
     // Good Morning
@@ -218,7 +272,12 @@ bot.on("message", async (msg) => {
     }
     if(msgReceived.includes("mp3")){
         bot.sendMessage(chatId, "Sending Song...");
-        await bot.sendAudio(chatId, "assets/music/" + msgReceived);
+        try {
+            const stream = fs.createReadStream("assets/music/" + msgReceived);
+            await bot.sendAudio(chatId, stream);            
+        } catch (error) {
+            await bot.sendAudio(chatId, "assets/music/" + msgReceived);
+        }
         bot.sendMessage(chatId, "Done!", commands);
     }
 
@@ -246,23 +305,36 @@ bot.on("message", async (msg) => {
     if(msgReceived.includes("download images")){
         bot.sendMessage(chatId, "Send me the image link...");
     }
-
     if((msgReceived.includes("jpg") == true) || (msgReceived.includes("png") == true) || (msgReceived.includes("gif") == true)){
         await bot.sendMessage(chatId, "Downloading...");
         await bot.sendPhoto(chatId, msgReceived);
         bot.sendMessage(chatId, "Done!");
     }
+
+    // Download Video
     if(msgReceived.includes("mp4")){
         await bot.sendMessage(chatId, "Downloading...");
         await bot.downloadFile(msgReceived, "assets/video");
         bot.sendMessage(chatId, "Done!");
     }
 
+    // Analyze Audio
+    if(msgReceived.includes("analyze music file")){
+        bot.sendMessage(chatId, "Send the music file...");
+        analyzeFile = true;
+    }
 
-    
-    
+    // Youtube to mp3
+    let pathToMp3 = "";
+    if(msgReceived.includes("youtube")){
+        bot.sendMessage(chatId, "Downloading...");
+        let pathToSaveFiles = "assets/music";
+        let convertLinkToMp3 = youtubeMp3Converter(pathToSaveFiles);
+        console.log(pathToMp3);
+        pathToMp3 = await convertLinkToMp3('https://www.youtube.com/watch?v=J_ub7Etch2U');
+        console.log(pathToMp3);
+    }
 });
-
 
 
 

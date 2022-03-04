@@ -7,7 +7,7 @@ const youtubeMp3Converter = require('youtube-mp3-converter');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const audio = require('fluent-ffmpeg/lib/options/audio');
 
-const token = '5208477658:AAHz6MzRo-5wKstgpJcYMLO3O5EeesMGT2Q';
+const token = '5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
 const bot = new TelegramBot(token, {polling: true});
 
 //
@@ -23,9 +23,10 @@ let commands = {
         "keyboard": [
             ["Hello"],
             ["About Me"],
+            ["Generate Avatar"],
             ["Analyze Music File"],
-            ["Save Song", "Send Songs"], 
-            ["Send Photo","Download Images"],
+            //["Save Song", "Send Songs"], 
+            //["Send Photo","Download Images"],
             ["Covid Stats", "Crypto Prices"],
             ["Good Morning" ,"Good Night"],
             ["Bye"],
@@ -101,8 +102,8 @@ ${data4["data"]["description"]["en"].substring(0,830)}
 
 
 // Covid API
-async function covidAPI(chatId)  {
-    await request('https://corona.lmao.ninja/v2/countries/Ethiopia', function (error, response, body) {
+async function covidAPI(chatId, msgReceived)  {
+    await request("https://corona.lmao.ninja/v2/countries/" + msgReceived, function (error, response, body) {
         if (!error && response.statusCode === 200) {
             let bodyJSON = JSON.parse(body);
             let covidData = "COVID CASES \n\n" + bodyJSON["country"] + "\n\nToday: " + bodyJSON["todayCases"] + "\nTotal: " + bodyJSON["cases"];
@@ -123,9 +124,8 @@ Tests: ${bodyJSON["tests"]}
 Recovered: ${bodyJSON["recovered"]}
 `;
             bot.sendPhoto(chatId, bodyJSON["countryInfo"]["flag"], {caption: covidData});
-            bot.sendMessage(chatId, "Done!", commands);
         } else {
-            console.log("error");
+            bot.sendMessage(chatId, "Sorry, Couldn't fetch data!", commands);
         }
     })
 }
@@ -207,6 +207,9 @@ function getDownloadedSongs ()  {
 }
 
 // Convo
+let checkCovid = false;
+let numberOfUses = 0;
+let listOfUsers = [];
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     let msgReceived = "";
@@ -218,8 +221,42 @@ bot.on("message", async (msg) => {
         bot.sendMessage(msg.audio["file_name"].toString());
     }
 
+    // Admin Controls
+    let newUser = true;
+    for(users of listOfUsers){
+        if(users["ID"] == msg.chat.id){
+            newUser = false;
+        }
+    }
+    if(newUser == true){
+        let userOBJ = {
+            "ID": msg.chat.id,
+            "username": msg.chat.username,
+            "first name": msg.chat.first_name,
+            "last name": msg.chat.last_name,
+        };
+        listOfUsers.push(userOBJ);
+    }
+    numberOfUses = numberOfUses + 1;
+    if(msgReceived.includes("admin db")){
+        await bot.sendMessage(chatId, "Welcome Admin!");
+        await bot.sendMessage(chatId, "Users:\n" + JSON.stringify(listOfUsers));
+        await bot.sendMessage(chatId, "Number of uses: " + numberOfUses.toString());
+        bot.sendMessage(chatId, "Done!");
+    }
+
+
+    
+    // Back
     if(msgReceived.includes("back")){
         bot.sendMessage(chatId, "What do you wanna do?", commands);
+    }
+
+    if(checkCovid == true){
+        bot.sendMessage(chatId, "Sending Covid Stats...");
+        await covidAPI(chatId, msgReceived);
+        checkCovid = false;
+        await bot.sendMessage(chatId, "Done!", commands);
     }
 
     // Hello
@@ -283,8 +320,8 @@ bot.on("message", async (msg) => {
 
     // Covid Stats
     if(msgReceived.includes("covid")){
-        bot.sendMessage(chatId, "Sending Covid Stats...");
-        await covidAPI(chatId);
+        checkCovid = true;
+        bot.sendMessage(chatId, "What country would you like to check for covid stats?");
     }
 
     // Crypto Prices
@@ -301,7 +338,7 @@ bot.on("message", async (msg) => {
     }
 
     // Pinterest Downloader
-    //Pinterest
+    // Pinterest
     if(msgReceived.includes("download images")){
         bot.sendMessage(chatId, "Send me the image link...");
     }
@@ -320,7 +357,7 @@ bot.on("message", async (msg) => {
 
     // Analyze Audio
     if(msgReceived.includes("analyze music file")){
-        bot.sendMessage(chatId, "Send the music file...");
+        bot.sendMessage(chatId, "Send the music file...\n(MP3 Files recommended)");
         analyzeFile = true;
     }
 
@@ -334,6 +371,46 @@ bot.on("message", async (msg) => {
         pathToMp3 = await convertLinkToMp3('https://www.youtube.com/watch?v=J_ub7Etch2U');
         console.log(pathToMp3);
     }
+
+
+    // Avatar Generator
+    let avatarName = {
+        "reply_markup": {
+            "keyboard": [
+                ["Back"],
+                ["Username"],
+                ["First Name"],
+                ["Last Name"],
+                ["Telegram ID"],
+            ]
+        }
+    };
+    if(msgReceived.includes("generate avatar")){
+        bot.sendMessage(chatId, "What name would you like to use to generate your unique avatar?", avatarName);
+    }
+    if(msgReceived.includes("first name")){
+        bot.sendMessage(chatId, "Generating a Unique Avatar Based of your First Name", commands);
+        await bot.sendPhoto(chatId, "https://api.multiavatar.com/" + msg.chat.first_name + ".png");
+        bot.sendMessage(chatId, "Done!");
+    }
+    if(msgReceived.includes("last name")){
+        bot.sendMessage(chatId, "Generating a Unique Avatar Based of your Last Name", commands);
+        await bot.sendPhoto(chatId, "https://api.multiavatar.com/" + msg.chat.last_name + ".png");
+        bot.sendMessage(chatId, "Done!");
+    }
+    if(msgReceived.includes("username")){
+        bot.sendMessage(chatId, "Generating a Unique Avatar Based of your UserName", commands);
+        await bot.sendPhoto(chatId, "https://api.multiavatar.com/" + msg.chat.username + ".png");
+        bot.sendMessage(chatId, "Done!");
+    }
+    if(msgReceived.includes("telegram id")){
+        bot.sendMessage(chatId, "Generating a Unique Avatar Based of your Telegram ID", commands);
+        await bot.sendPhoto(chatId, "https://api.multiavatar.com/" + msg.chat.id + ".png");
+        bot.sendMessage(chatId, "Done!");
+    }
+
+
+
 });
 
 

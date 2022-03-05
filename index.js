@@ -208,8 +208,69 @@ function getDownloadedSongs ()  {
 
 // Convo
 let checkCovid = false;
-let numberOfUses = 0;
-let listOfUsers = [];
+let numberOfUses = 571;
+let listOfUsers = [
+    {"ID":303411718,"username":"DagmawiBabi","first name":"Dagmawi Babi"},
+    {"ID":1848170437,"username":"SevenMillionJews","first name":"Yzoc","last name":"ThginDim"},
+    {"ID":342640448,"username":"Bura_t1","first name":"ⓑⓤⓡⓐ"},
+    {"ID":425672245,"username":"Mkeeba","first name":"B"},
+    {"ID":1006117217,"username":"nogoaway","first name":"bob"},
+    {"ID":407320925,"username":"femnazi","first name":"milaai"},
+    {"ID":1101064579,"username":"Bethany_Bk","first name":"Beti"},
+    {"ID":556659349,"username":"Chill_spartan","first name":"Ebenezer Shimeles"},
+    {"ID":1282745206,"username":"sador_eshetu","first name":"Sador","last name":"Eshetu"},
+    {"ID":926331803,"first name":"Elora"},
+    {"ID":992105472,"username":"noahark","first name":"Noah","last name":"Eyob"},
+    {"ID":385095019,"username":"KazumaNeet","first name":"Mekbib"},
+    {"ID":1723780784,"username":"Di_ana0000","first name":"Di_ana"},
+    {"ID":439769548,"username":"johntesfu5","first name":"John"},
+    {"ID":671110377,"username":"dereje7","first name":"Dereje7"},
+    {"ID":442050193,"username":"Jamy_8","first name":"Mintesnot M."},
+    {"ID":681299772,"username":"TYGAforEDIAM","first name":"shall"},
+    {"ID":346509350,"username":"Psychotic_Dude","first name":"ภคђ๏๓ "},
+    {"ID":160525521,"username":"chaitanya881","first name":"Chaitanya","last name":"Marwaha"},
+    {"ID":963064563,"username":"Yafet24","first name":"YY"},
+    {"ID":1064895136,"username":"Tukichido","first name":"✿◠‿◠🖤Mademoiselle💜 ◠‿◠✿"},
+    {"ID":2137690470,"username":"A98x0","first name":"無形的","last name":"再次"},
+    {"ID":1207374156,"username":"Ai_Specialist","first name":"THE 21PX"},
+    {"ID":1200526645,"username":"DanielGetu4real","first name":"Daniel Getu"},
+    {"ID":1371084721,"username":"ItIsMrX","first name":"Mr.X"},
+    {"ID":763948643,"username":"naolarega","first name":"naol","last name":"arega"},
+    {"ID":700026594,"username":"par0s","first name":"Kidus","last name":"Yoseph"},
+    {"ID":1656866703,"first name":"Girum"},
+    {"ID":1071642660,"username":"nahomtl","first name":"nahom"},
+    {"ID":287339072,"username":"no_diggity","first name":"Abel"},
+    {"ID":427189883,"username":"Blogrammer","first name":"Aman"},
+    {"ID":1666631494,"username":"Medin_s","first name":"medin"},
+    {"ID":355355326,"first name":"Negassa","last name":"B."},
+    {"ID":691540144,"username":"inbox005","first name":"Melkam"},
+    {"ID":1627748430,"username":"Kidus91","first name":"Kidus"},
+    {"ID":805970172,"username":"Daggy_HPJ","first name":"Daggy","last name":"Zeረጦ 🧘🏻‍♂"},
+    {"ID":763376207,"username":"Frectonz","first name":"Fraol","last name":"Lemecha"},
+    {"ID":483217477,"username":"shepherd979","first name":"shepherd 2.0"},
+    {"ID":718272592,"username":"yihalemm","first name":"Yihalem"},
+    {"ID":911906779,"username":"ALPHACOD3R","first name":"ALPHA COD3R"},
+    {"ID":1460934631,"username":"yomiyu_adam","first name":"Yomiyu"},
+    {"ID":1234971640,"username":"Story_of_zab","first name":"A","last name":"H"},
+    {"ID":1851389256,"username":"Abdisa_A","first name":"•_•"},
+    {"ID":1042702092,"username":"Namakthehabesha","first name":"♧☆Ñàtí♧","last name":"☆Mäķ☆♧"},
+    {"ID":888388520,"username":"JRobi","first name":"John","last name":"Robi"},
+    {"ID":5113436763,"first name":"Bire"},
+    {"ID":792077149,"first name":"Elsa"},
+    {"ID":1106208608,"username":"breatheeasy","first name":"Tina"},
+    {"ID":1849685182,"username":"Yohanna_asha","first name":"Yohanna","last name":"Asha"},
+    {"ID":618597713,"username":"BisRy","first name":"BisRy","last name":""},
+    {"ID":1064895136,"username":"Tukichido","first name":"✿◠‿◠🖤Mademoiselle💜 ◠‿◠✿"},
+    {"ID":613535614,"username":"justdaiki","first name":"Elnatan"},
+    {"ID":423443091,"username":"Abelgetahun","first name":"Abel"},
+    {"ID":373414660,"username":"Rewwa","first name":"Rewina"},
+    {"ID":1106016480,"username":"Lambo0777","first name":"Henok ሔ"},
+    {"ID":572867578,"username":"Kingakram90","first name":"KING亗AKRAM"},
+    {"ID":354722604,"username":"Thenewcancer","first name":"Mohamed"},
+    {"ID":583491045,"username":"Eyujunior","first name":"Ĕŷų","last name":"Ĵř"},
+    {"ID":519947764,"username":"fikirget","first name":"fikir"},
+    {"ID":1656866703,"first name":"Girum"}
+];
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     let msgReceived = "";
@@ -241,6 +302,7 @@ bot.on("message", async (msg) => {
     if(msgReceived.includes("admin db")){
         await bot.sendMessage(chatId, "Welcome Admin!");
         await bot.sendMessage(chatId, "Users:\n" + JSON.stringify(listOfUsers));
+        await bot.sendMessage(chatId, "Number of users: " + listOfUsers.length.toString());
         await bot.sendMessage(chatId, "Number of uses: " + numberOfUses.toString());
         bot.sendMessage(chatId, "Done!");
     }
@@ -289,6 +351,7 @@ bot.on("message", async (msg) => {
     }
 
     // Send Photo
+    /*
     if(msgReceived.includes("send photo")){
         let imageLink = msgReceived.substring(10, msgReceived.length).toString();
         let imageLink2 = "Sending photo... \n" + msgReceived.substring(10, msgReceived.length);
@@ -317,6 +380,7 @@ bot.on("message", async (msg) => {
         }
         bot.sendMessage(chatId, "Done!", commands);
     }
+    */
 
     // Covid Stats
     if(msgReceived.includes("covid")){
@@ -337,6 +401,7 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, userProfile);
     }
 
+    /*
     // Pinterest Downloader
     // Pinterest
     if(msgReceived.includes("download images")){
@@ -354,6 +419,7 @@ bot.on("message", async (msg) => {
         await bot.downloadFile(msgReceived, "assets/video");
         bot.sendMessage(chatId, "Done!");
     }
+    */
 
     // Analyze Audio
     if(msgReceived.includes("analyze music file")){
@@ -361,6 +427,7 @@ bot.on("message", async (msg) => {
         analyzeFile = true;
     }
 
+    /*
     // Youtube to mp3
     let pathToMp3 = "";
     if(msgReceived.includes("youtube")){
@@ -371,7 +438,7 @@ bot.on("message", async (msg) => {
         pathToMp3 = await convertLinkToMp3('https://www.youtube.com/watch?v=J_ub7Etch2U');
         console.log(pathToMp3);
     }
-
+    */
 
     // Avatar Generator
     let avatarName = {

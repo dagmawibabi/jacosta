@@ -7,7 +7,7 @@ const youtubeMp3Converter = require('youtube-mp3-converter');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const audio = require('fluent-ffmpeg/lib/options/audio');
 
-const token = '5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
+const token = "5208477658:AAGuWSdZr5pE_OV_o2bMqgUhFDOK8v4BxVg"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
 const bot = new TelegramBot(token, {polling: true});
 
 //
@@ -206,9 +206,16 @@ function getDownloadedSongs ()  {
     });    
 }
 
+// Error Handling
+bot.on('polling_error', (error) => {
+    console.log(error.code);  // => 'EFATAL'
+    bot.sendMessage(error.toString());
+});
+
+
 // Convo
 let checkCovid = false;
-let numberOfUses = 571;
+let numberOfUses = 653;
 let listOfUsers = [
     {"ID":303411718,"username":"DagmawiBabi","first name":"Dagmawi Babi"},
     {"ID":1848170437,"username":"SevenMillionJews","first name":"Yzoc","last name":"ThginDim"},
@@ -269,8 +276,11 @@ let listOfUsers = [
     {"ID":354722604,"username":"Thenewcancer","first name":"Mohamed"},
     {"ID":583491045,"username":"Eyujunior","first name":"Ĕŷų","last name":"Ĵř"},
     {"ID":519947764,"username":"fikirget","first name":"fikir"},
-    {"ID":1656866703,"first name":"Girum"}
+    {"ID":1656866703,"first name":"Girum"},
+    {"ID":937649603,"username":"abuuhani","first name":"."},
+    {"ID":410885468,"username":"Idktbhtf","first name":"E X"}
 ];
+let newUser = true;
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     let msgReceived = "";
@@ -283,7 +293,6 @@ bot.on("message", async (msg) => {
     }
 
     // Admin Controls
-    let newUser = true;
     for(users of listOfUsers){
         if(users["ID"] == msg.chat.id){
             newUser = false;
@@ -299,11 +308,16 @@ bot.on("message", async (msg) => {
         listOfUsers.push(userOBJ);
     }
     numberOfUses = numberOfUses + 1;
-    if(msgReceived.includes("admin db")){
+    if(msgReceived.includes("admin db 2129")){
         await bot.sendMessage(chatId, "Welcome Admin!");
-        await bot.sendMessage(chatId, "Users:\n" + JSON.stringify(listOfUsers));
-        await bot.sendMessage(chatId, "Number of users: " + listOfUsers.length.toString());
-        await bot.sendMessage(chatId, "Number of uses: " + numberOfUses.toString());
+        try {
+            bot.sendMessage(chatId, "Users:\n" + JSON.stringify(listOfUsers));
+            bot.sendMessage(chatId, "Number of users: " + listOfUsers.length.toString());
+            bot.sendMessage(chatId, "Number of uses: " + numberOfUses.toString());
+            bot.sendDocument(chatId, "stderr.log");            
+        } catch (error) {
+            bot.sendMessage(chatId, "Failed to load admin stats!");           
+        }
         bot.sendMessage(chatId, "Done!");
     }
 

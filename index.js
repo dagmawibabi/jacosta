@@ -7,7 +7,7 @@ const youtubeMp3Converter = require('youtube-mp3-converter');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const audio = require('fluent-ffmpeg/lib/options/audio');
 
-const token = "5208477658:AAGuWSdZr5pE_OV_o2bMqgUhFDOK8v4BxVg"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
+const token = "5208477658:AAENnwpOjFaU-MoXUFMCAkHuOEJQc85mIl8"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
 const bot = new TelegramBot(token, {polling: true});
 
 //
@@ -81,6 +81,7 @@ async function getCryptoData(chatId) {
     for(var i = 0; i < 10; i++){
         let data4 = await CoinGeckoClient.coins.fetch(data2["data"][i]["id"], {});
 
+// Description: ${data4["data"]["description"]["en"].substring(0,830)}
 let cryptoData = `
 ${data2["data"][i]["market_data"]["market_cap_rank"]}. ${data2["data"][i]["name"]} - ${data2["data"][i]["symbol"]}
 
@@ -90,9 +91,6 @@ Low (24hr): \$${data2["data"][i]["market_data"]["low_24h"]["usd"]}
 Change (24hr): ${data2["data"][i]["market_data"]["price_change_percentage_24h"]}%
 Total Supply: \$${data2["data"][i]["market_data"]["total_supply"]}
 Circulating Supply: \$${data2["data"][i]["market_data"]["circulating_supply"]}
-
-Description:
-${data4["data"]["description"]["en"].substring(0,830)}
 `;
         await bot.sendPhoto(chatId, data2["data"][i]["image"]["large"], {caption: cryptoData});
     }

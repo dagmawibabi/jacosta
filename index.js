@@ -6,6 +6,8 @@ const CoinGeckoClient = new CoinGecko();
 const youtubeMp3Converter = require('youtube-mp3-converter');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const audio = require('fluent-ffmpeg/lib/options/audio');
+/*const ytdlCore = require('ytdl-core');
+const YoutubeMp3Downloader = require("youtube-mp3-downloader");*/
 
 const token = "5208477658:AAENnwpOjFaU-MoXUFMCAkHuOEJQc85mIl8"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
 const bot = new TelegramBot(token, {polling: true});
@@ -280,6 +282,8 @@ let listOfUsers = [
 ];
 let newUser = true;
 bot.on("message", async (msg) => {
+    console.log("here");
+
     const chatId = msg.chat.id;
     let msgReceived = "";
     try {
@@ -361,6 +365,31 @@ bot.on("message", async (msg) => {
     if(msgReceived.includes("bye")){
         bot.sendMessage(chatId, bye);
     }
+
+    // YT Downloader
+    // ytdl http://www.youtube.com/watch?v=_HSylqgVYQI | ffmpeg -i pipe:0 -b:a 192K -vn myfile.mp3
+   /* if(msgReceived.includes("ytdl")){
+        //Configure YoutubeMp3Downloader with your settings
+        var YD = new YoutubeMp3Downloader({
+            "ffmpegPath": "ffmpeg",        // FFmpeg binary location
+            "outputPath": "assets/video",    // Output file location (default: the home directory)
+            "youtubeVideoQuality": "highestaudio",  // Desired video quality (default: highestaudio)
+            "queueParallelism": 2,                  // Download parallelism (default: 1)
+            "progressTimeout": 2000,                // Interval in ms for the progress reports (default: 1000)
+            "allowWebm": false                      // Enable download from WebM sources (default: false)
+        });
+
+        //Download video and save as MP3 file
+        await YD.download("6H7-3_Wgwu4");
+
+
+        //let a = await ytdlCore.getInfo("https://www.youtube.com/watch?v=nCkpzqqog4k");
+        //console.log(a);
+        //await ytdlCore('https://www.youtube.com/watch?v=nCkpzqqog4k').pipe(fs.createWriteStream('assets/video/video.mp4'));
+        //await bot.sendVideo(chatId, "assets/video/video.mp4");
+        bot.sendMessage(chatId, "Done!");
+    }*/
+ 
 
     // Send Photo
     /*
@@ -488,6 +517,7 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, "Done!");
     }
 
+    
 
 
 });

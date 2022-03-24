@@ -3,13 +3,8 @@ const request = require('request');
 const fs = require('fs');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
-const youtubeMp3Converter = require('youtube-mp3-converter');
-const ffmpeg = require('@ffmpeg-installer/ffmpeg');
-const audio = require('fluent-ffmpeg/lib/options/audio');
-/*const ytdlCore = require('ytdl-core');
-const YoutubeMp3Downloader = require("youtube-mp3-downloader");*/
 
-const token = "5208477658:AAENnwpOjFaU-MoXUFMCAkHuOEJQc85mIl8"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
+const token = "5208477658:AAEAADVDXgXdiWNPoc4mxo2IqyQlYsl3QO4"; //'5208477658:AAFKDFK3XmBX0qnQjcFfJm9JOtTEjYdxDOg';
 const bot = new TelegramBot(token, {polling: true});
 
 //
@@ -24,17 +19,30 @@ let commands = {
     "reply_markup": {
         "keyboard": [
             ["Hello"],
-            ["About Me"],
-            ["Generate Avatar"],
-            ["Analyze Music File"],
-            //["Save Song", "Send Songs"], 
-            //["Send Photo","Download Images"],
+            ["About Me", "Entertainment"],
             ["Covid Stats", "Crypto Prices"],
+            ["Generate Avatar", "Generate QR Code"],
+            ["Analyze Music File", "Screenshot Website"], 
             ["Good Morning" ,"Good Night"],
             ["Bye"],
+            
+            //["Save Song", "Send Songs"], 
+            //["Send Photo","Download Images"],
         ]
     }
 };
+
+let funStuff = {
+    "reply_markup": {
+        "keyboard": [
+            ["Back"],
+            ["I'm Bored"],
+            ["Tell Me a Yo-Mama Joke"],
+            ["Get a Random Excuse"],
+        ]
+    }
+};
+
 
 // Start
 bot.on(/\/start/, (msg) => {
@@ -42,6 +50,79 @@ bot.on(/\/start/, (msg) => {
     let greetings = "Hello 👋 \n" +  msg.chat.first_name.toString();
     bot.sendMessage(chatId, greetings, commands);
 });
+
+// Screenshot Site API
+async function sendScreenshot(chatId, msgReceived){
+    screenshotWebsite = false;
+    await bot.sendMessage(chatId, "Screenshot's being taken...");
+    let url = "https://api.savepage.io/v1?key=87d25ddd6724715fcd0a0b891a2da4a4&q=" + msgReceived + "&width=1280&height=800";
+    await bot.sendPhoto(chatId, url);
+    bot.sendMessage(chatId, "Done!");
+    /*let url = "https://api.browshot.com/api/v1/simple?url=" + msgReceived + "&key=mKJfGj6Vvv98CwjLkS03YQREoZyub9";
+    await bot.sendPhoto(chatId, url);
+    bot.sendMessage(chatId, "Done!");*/
+    
+    /*
+    let webURL = "https://api.browshot.com/api/v1/simple?url=" + msgReceived + ".com&key=mKJfGj6Vvv98CwjLkS03YQREoZyub9";
+    await request(webURL, async (error, response, body) => {
+        if (!error && response.statusCode === 200)  {
+            let bodyJSON = JSON.parse(body);
+            console.log(bodyJSON);
+            bot.sendMessage(chatId, "Done!");
+        }
+    });*/
+}
+
+// Generate Excuse API
+async function generateExcuse(chatId) {
+    await request("https://excuser.herokuapp.com/v1/excuse", async (error, response, body) => {
+        if (!error && response.statusCode === 200)  {
+            let bodyJSON = JSON.parse(body);
+            await bot.sendMessage(chatId, `Say ${bodyJSON[0]["excuse"]}`);
+            bot.sendMessage(chatId, "Done!", commands);
+        } else {
+            bot.sendMessage(chatId, "Cannot get an excuse, You are screwed!", commands);
+
+        }
+    });
+}
+
+// YoMama Joke
+async function yoMamaJoke(chatId) {
+    await request("https://yomomma-api.herokuapp.com/jokes", async (error, response, body) => {
+        if (!error && response.statusCode === 200)  {
+            let bodyJSON = JSON.parse(body);
+            await bot.sendMessage(chatId, bodyJSON["joke"]);
+            bot.sendMessage(chatId, "Done!", commands);
+        } else {
+            bot.sendMessage(chatId, "Cannot get a Joke!", commands);
+
+        }
+    });
+
+}
+
+// Bored API
+async function boredAPI(chatId){
+    await request("https://www.boredapi.com/api/activity/", async (error, response, body) => {
+        if (!error && response.statusCode === 200)  {
+            let bodyJSON = JSON.parse(body);
+            let participants = "";
+            if(bodyJSON["participants"] > 1){
+                participants = `with ${bodyJSON["participants"]} people.`;
+            } else if (bodyJSON["participants"] = 1) {
+                participants = `with ${bodyJSON["participants"]} person.`;
+            } else {
+                participants = `by yourself.`;
+            }
+            await bot.sendMessage(chatId, `Try to ${bodyJSON["activity"]} ${participants}`);
+            bot.sendMessage(chatId, "Done!", commands);
+        } else {
+            bot.sendMessage(chatId, "Failed to get an activity!", commands);
+        }
+
+    });
+}
 
 // Covid API
 async function covidAPI(chatId)  {
@@ -281,8 +362,9 @@ let listOfUsers = [
     {"ID":410885468,"username":"Idktbhtf","first name":"E X"}
 ];
 let newUser = true;
+let generateQR = false;
+let screenshotWebsite = false;
 bot.on("message", async (msg) => {
-    console.log("here");
 
     const chatId = msg.chat.id;
     let msgReceived = "";
@@ -292,6 +374,21 @@ bot.on("message", async (msg) => {
         msgReceived = "abc";
         //console.log(msg.audio.duration.toString());
         bot.sendMessage(msg.audio["file_name"].toString());
+    }
+
+    // QR Generator
+    if(generateQR == true){
+        await bot.sendMessage(chatId, "Generating QR Code...");
+        await bot.sendPhoto(chatId, "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + msgReceived);
+        bot.sendMessage(chatId, "Done!");
+        generateQR = false;
+        return 0;
+    }
+    // Screenshot site
+    if(screenshotWebsite == true) {
+        await sendScreenshot(chatId, msgReceived);
+        
+        return 0;
     }
 
     // Admin Controls
@@ -327,6 +424,8 @@ bot.on("message", async (msg) => {
     
     // Back
     if(msgReceived.includes("back")){
+        generateQR = false;
+        checkCovid = false;
         bot.sendMessage(chatId, "What do you wanna do?", commands);
     }
 
@@ -366,29 +465,7 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, bye);
     }
 
-    // YT Downloader
-    // ytdl http://www.youtube.com/watch?v=_HSylqgVYQI | ffmpeg -i pipe:0 -b:a 192K -vn myfile.mp3
-   /* if(msgReceived.includes("ytdl")){
-        //Configure YoutubeMp3Downloader with your settings
-        var YD = new YoutubeMp3Downloader({
-            "ffmpegPath": "ffmpeg",        // FFmpeg binary location
-            "outputPath": "assets/video",    // Output file location (default: the home directory)
-            "youtubeVideoQuality": "highestaudio",  // Desired video quality (default: highestaudio)
-            "queueParallelism": 2,                  // Download parallelism (default: 1)
-            "progressTimeout": 2000,                // Interval in ms for the progress reports (default: 1000)
-            "allowWebm": false                      // Enable download from WebM sources (default: false)
-        });
-
-        //Download video and save as MP3 file
-        await YD.download("6H7-3_Wgwu4");
-
-
-        //let a = await ytdlCore.getInfo("https://www.youtube.com/watch?v=nCkpzqqog4k");
-        //console.log(a);
-        //await ytdlCore('https://www.youtube.com/watch?v=nCkpzqqog4k').pipe(fs.createWriteStream('assets/video/video.mp4'));
-        //await bot.sendVideo(chatId, "assets/video/video.mp4");
-        bot.sendMessage(chatId, "Done!");
-    }*/
+    
  
 
     // Send Photo
@@ -442,25 +519,39 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, userProfile);
     }
 
-    /*
-    // Pinterest Downloader
-    // Pinterest
-    if(msgReceived.includes("download images")){
-        bot.sendMessage(chatId, "Send me the image link...");
-    }
-    if((msgReceived.includes("jpg") == true) || (msgReceived.includes("png") == true) || (msgReceived.includes("gif") == true)){
-        await bot.sendMessage(chatId, "Downloading...");
-        await bot.sendPhoto(chatId, msgReceived);
-        bot.sendMessage(chatId, "Done!");
+    // Generate QR Code
+    if(msgReceived.includes("generate qr")){
+        await bot.sendMessage(chatId, "Send me the message you want to convert to QR code");
+        generateQR = true;
     }
 
-    // Download Video
-    if(msgReceived.includes("mp4")){
-        await bot.sendMessage(chatId, "Downloading...");
-        await bot.downloadFile(msgReceived, "assets/video");
-        bot.sendMessage(chatId, "Done!");
+
+    // Fun Stuff
+    if(msgReceived.includes("entertainment")){
+        await bot.sendMessage(chatId, "Choose a category...",funStuff);
     }
-    */
+    if(msgReceived.includes("i'm bored")){
+        await bot.sendMessage(chatId, "You should...",funStuff);
+        await boredAPI(chatId);
+    }
+    if(msgReceived.includes("get a random excuse")){
+        await bot.sendMessage(chatId, "Generating a random excuse to get you out of trouble...",funStuff);
+        await generateExcuse(chatId);
+    }
+    
+
+    // Screenshot Website 
+    if(msgReceived.includes("screenshot website")){
+        screenshotWebsite = true;
+        await bot.sendMessage(chatId, "Send me the link of the website...");
+    }
+
+    // Tell Me a Yo-Mama Joke
+    if(msgReceived.includes("tell me a yo-mama joke")){
+        await bot.sendMessage(chatId, "Sending a joke...");
+        await yoMamaJoke(chatId);
+    }
+
 
     // Analyze Audio
     if(msgReceived.includes("analyze music file")){

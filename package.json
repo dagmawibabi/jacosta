@@ -13,13 +13,9 @@
   "dependencies": {
     "@dicebear/avatars": "^4.10.2",
     "@dicebear/avatars-male-sprites": "^4.10.2",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "coingecko-api": "^1.0.10",
-    "ffmpeg": "^0.0.4",
-    "fluent-ffmpeg": "^2.1.2",
     "node-telegram-bot-api": "^0.56.0",
     "nodemon": "^2.0.15",
-    "request": "^2.88.2",
-    "youtube-mp3-converter": "^1.0.3"
+    "request": "^2.88.2"
   }
 }
